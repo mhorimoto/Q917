@@ -120,8 +120,10 @@
       "track_widths": [
         0.0,
         0.2,
+        0.25,
         0.4,
-        0.6
+        0.6,
+        1.0
       ],
       "via_dimensions": [
         {
@@ -356,7 +358,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Arduino_Nano.kicad_pro",
+    "filename": "Q917.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -420,6 +422,15 @@
       "version": 1
     },
     "net_format_name": "",
+    "ngspice": {
+      "fix_include_paths": true,
+      "fix_passive_vals": false,
+      "meta": {
+        "version": 0
+      },
+      "model_mode": 0,
+      "workbook_filename": ""
+    },
     "page_layout_descr_file": "",
     "plot_directory": "",
     "spice_adjust_passive_values": false,

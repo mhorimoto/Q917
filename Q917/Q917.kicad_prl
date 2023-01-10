@@ -1,6 +1,6 @@
 {
   "board": {
-    "active_layer": 49,
+    "active_layer": 31,
     "active_layer_preset": "",
     "auto_track_width": true,
     "hidden_nets": [],
@@ -62,10 +62,10 @@
       38
     ],
     "visible_layers": "fffffff_ffffffff",
-    "zone_display_mode": 1
+    "zone_display_mode": 0
   },
   "meta": {
-    "filename": "Arduino_Nano.kicad_prl",
+    "filename": "Q917.kicad_prl",
     "version": 3
   },
   "project": {

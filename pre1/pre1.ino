@@ -4,6 +4,13 @@
 
 LiquidCrystal_I2C lcd(0x27,16,2);
 
+char *txt[3][2];  // [screen][rows][columns]
+txt[0][0] = "UECS Simulator  ";
+txt[0][1] = "Q917 Ver:0.01   ";
+txt[1][0] = "MAC Address     ";
+txt[1][1] = "IP Address      ";
+
+
 void setup(void) {
   lcd.init();
   lcd.backlight();
@@ -14,7 +21,7 @@ void setup(void) {
   lcd.setCursor(8,0);
   lcd.print("I:");
   lcd.setCursor(8,1);
-  lcd.print("E:");
+  lcd.print("C:");
   pinMode(A0,INPUT);
   pinMode(A1,INPUT);
   pinMode(A2,INPUT);

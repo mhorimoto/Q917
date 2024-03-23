@@ -13,6 +13,9 @@ _autosave-*
 *-save.pro
 *-save.kicad_pcb
 fp-info-cache
+tmp/*
+main/main.touch
+lowcore/lowcore.touch
 
 # Netlist files (exported from Eeschema)
 *.net
@@ -27,3 +30,5 @@ fp-info-cache
 
 # Backupfiles
 Q917/Q917-backups/*.zip
+
+tmp/*

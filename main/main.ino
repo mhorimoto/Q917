@@ -11,7 +11,8 @@ EthernetClient client;
 
 byte   lcdf;
 uint8_t mac[6];
-uint8_t ip[] = {192,168,35,2};   // 先頭を0にするとDHCPで決定する。
+//uint8_t ip[] = {192,168,35,2};   // 先頭を0にするとDHCPで決定する。
+uint8_t ip[] = {0,168,35,2};   // 先頭を0にするとDHCPで決定する。
 uint8_t nmask[]  = {255,255,255,0};
 uint8_t nullip[] = {0,0,0,0};
 char *txt[4][2];  // [screen][rows][columns]

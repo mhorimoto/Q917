@@ -26,9 +26,9 @@ void setup(void) {
   int i;
   char z[17];
   txt[0][0] = "UECS Simulator  ";
-  txt[0][1] = "Q917 Ver:1.00   ";
-  txt[1][0] = "DEN-NOH01       ";
-  txt[1][1] = "                ";
+  txt[0][1] = "Q917 Ver:2.00   ";
+  txt[1][0] = "DATA DRIVEN     ";
+  txt[1][1] = "AGRICULTURE     ";
   txt[2][0] = "MAC Address     ";
   txt[2][1] = "IP Address      ";
   txt[3][0] = "0000.0000.0000  ";
@@ -109,28 +109,31 @@ void loop(void) {
   a2 = (int)li;
   a3 = analogRead(A2);
   li = map(a3,0,1023,0,1300);
+  a3 = (int)li;
   a4 = analogRead(A3);
-
-  sprintf(s1,"%3d.%01d",a1b,abs(a1c));
-  sprintf(s2,"%3d",a2);
-  sprintf(s3,"%4d",(int)li);
-  sprintf(s4,"%4d",a4);
+  li = map(a4,0,1023,200,2000);
+  a4 = (int)li;
+  
+  sprintf(s1,"%3d.%01d",a1b,abs(a1c));  // Temp
+  sprintf(s2,"%3d",a2);                 // Humi
+  sprintf(s3,"%4d",a3);                 // Radiation
+  sprintf(s4,"%4d",a4);                 // CO2
   if (lcdf==1) {
     lcd.setCursor(0,1);
     lcd.print("T:");
     lcd.setCursor(0,0);
-    lcd.print("H:");
-    lcd.setCursor(8,0);
     lcd.print("R:");
-    lcd.setCursor(8,1);
+    lcd.setCursor(10,0);
     lcd.print("C:");
+    lcd.setCursor(10,1);
+    lcd.print("H:");
     lcd.setCursor(2,1);
     lcd.print(s1);
-    lcd.setCursor(2,0);
+    lcd.setCursor(13,1);
     lcd.print(s2);
-    lcd.setCursor(10,0);
+    lcd.setCursor(2,0);
     lcd.print(s3);
-    lcd.setCursor(10,1);
+    lcd.setCursor(12,0);
     lcd.print(s4);
   } else {
     lcd.setCursor(0,0);

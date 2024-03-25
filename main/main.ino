@@ -143,7 +143,7 @@ void loop(void) {
   }
   sprintf(s1,"%d.%01d",a1b,abs(a1c));
   sprintf(s2,"%d",a2);
-  sprintf(s3,"%d",(int)li);
+  sprintf(s3,"%d",a3);
   sprintf(s4,"%d",a4);
   msec = millis();
   if ((msec-p1msec)>=1000) {
@@ -166,10 +166,15 @@ void loop(void) {
 void UserEvery1Sec(char s1[],char s2[],char s3[],char s4[]) {
   period1sec = 2;
   uecsSendData(0x10,s1);
+  delay(30);
   uecsSendData(0x30,s2);
+  delay(30);
   uecsSendData(0x50,s3);
+  delay(30);
   uecsSendData(0x70,s4);
+  delay(30);
   uecsSendData(0x90,"0");
+  delay(30);
   period1sec = 0;
 }
 

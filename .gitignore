@@ -16,6 +16,7 @@ fp-info-cache
 tmp/*
 main/main.touch
 lowcore/lowcore.touch
+ardeeprom/ardeeprom.touch
 
 # Netlist files (exported from Eeschema)
 *.net

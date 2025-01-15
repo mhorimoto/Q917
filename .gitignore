@@ -30,5 +30,5 @@ lowcore/lowcore.touch
 
 # Backupfiles
 Q917/Q917-backups/*.zip
-
+*/*.touch
 tmp/*

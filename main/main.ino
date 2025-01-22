@@ -26,7 +26,7 @@ void setup(void) {
   int i;
   char z[17];
   txt[0][0] = "UECS Simulator  ";
-  txt[0][1] = "Q917 Ver:2.00   ";
+  txt[0][1] = "Q917B Ver:2.10  ";
   txt[1][0] = "DATA DRIVEN     ";
   txt[1][1] = "AGRICULTURE     ";
   txt[2][0] = "MAC Address     ";
@@ -100,17 +100,17 @@ void loop(void) {
       lcd.clear();
     }
   }
-  a1 = analogRead(A0);
+  a1 = analogRead(A0);               // 温度
   li = map(a1,0,1022,-100,500);
   a1b = (int)(li/10);
   a1c = (int)(li-(a1b*10));
-  a2 = analogRead(A1);
+  a2 = analogRead(A1);               // 湿度
   li = map(a2,0,1022,0,100);
   a2 = (int)li;
-  a3 = analogRead(A2);
+  a3 = analogRead(A2);               // 照度
   li = map(a3,0,1023,0,1300);
   a3 = (int)li;
-  a4 = analogRead(A3);
+  a4 = analogRead(A3);               // CO2
   li = map(a4,0,1023,200,2000);
   a4 = (int)li;
   
@@ -119,21 +119,21 @@ void loop(void) {
   sprintf(s3,"%4d",a3);                 // Radiation
   sprintf(s4,"%4d",a4);                 // CO2
   if (lcdf==1) {
-    lcd.setCursor(0,1);
-    lcd.print("T:");
     lcd.setCursor(0,0);
+    lcd.print("T:");
+    lcd.setCursor(10,1);
     lcd.print("R:");
     lcd.setCursor(10,0);
-    lcd.print("C:");
-    lcd.setCursor(10,1);
     lcd.print("H:");
-    lcd.setCursor(2,1);
-    lcd.print(s1);
-    lcd.setCursor(13,1);
-    lcd.print(s2);
+    lcd.setCursor(0,1);
+    lcd.print("C:");
     lcd.setCursor(2,0);
-    lcd.print(s3);
+    lcd.print(s1);
     lcd.setCursor(12,0);
+    lcd.print(s2);
+    lcd.setCursor(12,1);
+    lcd.print(s3);
+    lcd.setCursor(2,1);
     lcd.print(s4);
   } else {
     lcd.setCursor(0,0);

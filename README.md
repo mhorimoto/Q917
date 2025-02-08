@@ -5,9 +5,10 @@ UECSシミュレータ
 
 ## H/W諸元
 
-* CPU: Arduino NANO v3
+* CPU: Arduino UNO R3
 * LAN: W5500
 * LCD: 16x2
+* CASE: TAKACHI TW9-4-17-B
 
 ## UECS諸元
 

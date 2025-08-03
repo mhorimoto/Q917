@@ -26,7 +26,7 @@ void setup(void) {
   int i;
   char z[17];
   txt[0][0] = "UECS Simulator  ";
-  txt[0][1] = "Q917 Ver:2.00   ";
+  txt[0][1] = "Q917 Ver:2.10   ";
   txt[1][0] = "DATA DRIVEN     ";
   txt[1][1] = "AGRICULTURE     ";
   txt[2][0] = "MAC Address     ";
@@ -165,11 +165,11 @@ void loop(void) {
 
 void UserEvery1Sec(char s1[],char s2[],char s3[],char s4[]) {
   period1sec = 2;
-  uecsSendData(0x10,s1);
+  uecsSendData(0x10,s3);
   delay(30);
   uecsSendData(0x30,s2);
   delay(30);
-  uecsSendData(0x50,s3);
+  uecsSendData(0x50,s1);
   delay(30);
   uecsSendData(0x70,s4);
   delay(30);

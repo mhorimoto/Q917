@@ -55,7 +55,7 @@ void recv16528port(void) {
             idata = strtol(edata, NULL, 16);
             EEPROM.update(iaddr,idata);
             sprintf(val,EEPROMIMG,iaddr,idata);
-            sendUdp16528(val,src,16528);
+            sendUdp16528(val,src,srcPort);
         }
         if (val[0]=='D') {
             char lbuf[81];
@@ -70,7 +70,7 @@ void recv16528port(void) {
                 }
             }
             lbuf[80] = 0; // Null terminate
-            sendUdp16528(lbuf,src,16528);
+            sendUdp16528(lbuf,src,srcPort);
             for (int i = 0; i < 80; i++) {
                 uint8_t c = pgm_read_byte(&RULE2[i]);      // PROGMEM から1バイト読む
                 lbuf[i] = c;
@@ -81,7 +81,7 @@ void recv16528port(void) {
                 }
             }
             lbuf[80] = 0; // Null terminate
-            sendUdp16528(lbuf,src,16528);
+            sendUdp16528(lbuf,src,srcPort);
             eaddr[0]=val[1];
             eaddr[1] = (char)NULL;
             iaddr = strtol(eaddr, NULL, 16);
@@ -98,7 +98,7 @@ void recv16528port(void) {
 	            bytemap(romd[4]),bytemap(romd[5]),bytemap(romd[6]),bytemap(romd[7]),
 	            bytemap(romd[8]),bytemap(romd[9]),bytemap(romd[10]),bytemap(romd[11]),
 	            bytemap(romd[12]),bytemap(romd[13]),bytemap(romd[14]),bytemap(romd[15]));
-                sendUdp16528(lbuf,src,16528);
+                sendUdp16528(lbuf,src,srcPort);
             }
         }
         if (val[0]=='V') {
@@ -110,7 +110,7 @@ void recv16528port(void) {
                 }
             }
             version_info[i] = 0; // Null terminate
-            sendUdp16528(version_info,src,16528);
+            sendUdp16528(version_info,src,srcPort);
         }
     }
 }

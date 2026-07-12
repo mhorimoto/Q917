@@ -26,7 +26,7 @@ void setup(void) {
     int i;
     char z[17];
     txt[0][0] = "UECS Simulator  ";
-    txt[0][1] = "Q917B Ver:2.10  ";
+    txt[0][1] = "Q917B Ver:2.12  ";
     txt[1][0] = "DATA DRIVEN     ";
     txt[1][1] = "AGRICULTURE     ";
     txt[2][0] = "MAC Address     ";

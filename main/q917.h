@@ -1,6 +1,6 @@
 #ifndef _Q917_H_
 #define _Q917_H_
-#define _Q917_H_V 100
+#define _Q917_H_V 200
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -49,4 +49,8 @@
 #define UECS_NAME 26    // Max length of UECS Name
 #define UECS_VAL   6    // Max length of UECS Value
 #define UECS_IP   16    // Max length of IP Address
+
+/*** EEPROM Addresses ***/
+#define EEPROM_BASE_ADDR 0x00
+#define VERSION_INFO 0x3f0  // Version Info (16 bytes limit)
 #endif

@@ -35,7 +35,7 @@ void setup(void) {
     int i;
     char z[17];
     txt[0][0] = "UECS Simulator  ";
-    txt[0][1] = "Q917B Ver:2.13  ";
+    txt[0][1] = "Q917B Ver:2.15  ";
     txt[1][0] = "DATA DRIVEN     ";
     txt[1][1] = "AGRICULTURE     ";
     txt[2][0] = "MAC Address     ";
@@ -76,6 +76,12 @@ void setup(void) {
     }
     sprintf(strIP,"%d.%d.%d.%d",localIP[0],localIP[1],localIP[2],localIP[3]);
     sprintf(txt[3][1],"%s",strIP);
+    // ---- Version Info のEEPROM書き込み（16バイトまで） ----
+    char *verInfo = txt[0][1];
+    for (i = 0; i < 16; i++) {
+        EEPROM.update(VERSION_INFO + i, *(verInfo+i));
+    }
+    // -------------------------------------------------------
     lcdout(3,0,1,1);
     Udp16520.begin(16520);
     Udp16528.begin(16528);
@@ -294,7 +300,8 @@ void lcdout(int m,int l1,int l2,int cl) {
 
 void uecsSendData(int a,char *val) {
     const char *xmlDT PROGMEM = "<?xml version=\"1.0\"?><UECS ver=\"1.00-E10\"><DATA type=\"%s\" room=\"%d\" region=\"%d\" order=\"%d\" priority=\"%d\">%s</DATA><IP>%s</IP></UECS>";
-    byte room,region,order,priority,interval;
+    byte room,region,priority,interval;
+    uint16_t order;
     int  i;
     char name[26],dname[26]; // ,val[6];
     EEPROM.get(a+0x01,room);

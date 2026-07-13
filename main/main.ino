@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <Ethernet2.h>
 #include <EthernetUdp2.h> // UDP library from: bjoern@cs.stanford.edu 12/30/2008
+#include "q917.h"
 
 LiquidCrystal_I2C lcd(0x27,16,2);
 
@@ -21,12 +22,20 @@ char uecsid[6], uecstext[180],linebuf[80],val[16];
 IPAddress localIP,broadcastIP,subnetmaskIP,remoteIP;
 EthernetUDP Udp16520,Udp16528;
 int period1sec,period10sec,period60sec;
+// --- 自動停止のための変数 ---
+int lastADCValues[4] = {0, 0, 0, 0}; // A0, A1, A2, A3 の前回の値を保持
+unsigned long lastChangeTime = 0;    // 最後に値が変化した時間（ミリ秒）
+bool isSendingSuspended = false;     // 送信停止フラグ
+int displayMode = 0;                 // 0: 通常表示, 1: プログラム名/Ver, 2: IP/MAC
+int lastSwState = HIGH;              // 前回のスイッチ状態
+unsigned long lastSwTime = 0;        // チャタリング防止用タイマー
+// --------------------
 
 void setup(void) {
     int i;
     char z[17];
     txt[0][0] = "UECS Simulator  ";
-    txt[0][1] = "Q917B Ver:2.12  ";
+    txt[0][1] = "Q917B Ver:2.13  ";
     txt[1][0] = "DATA DRIVEN     ";
     txt[1][1] = "AGRICULTURE     ";
     txt[2][0] = "MAC Address     ";
@@ -81,17 +90,59 @@ void setup(void) {
     period1sec  = 0;
     period10sec = 0;
     period60sec = 0;
+    // --- 自動停止のための初期化 ---
+    lastADCValues[0] = analogRead(A0);
+    lastADCValues[1] = analogRead(A1);
+    lastADCValues[2] = analogRead(A2);
+    lastADCValues[3] = analogRead(A3);
+    lastChangeTime = millis();
+    isSendingSuspended = false;
+    // -------------------------
+    pinMode(SW_SELECT, INPUT_PULLUP);
+    lastSwState = digitalRead(SW_SELECT);
+    // ----------------------------------------------------
 }
 
 void loop(void) {
-    int a1,a2,a3,a4,a1b,a1c;
+    int a1,a2,a3,a4,a1b,a1c,swState;
     char s1[6],s2[6],s3[6],s4[6];
-    static unsigned long msec,p1msec,p10msec,p60msec;
     long li;
     float fl;
-
+    unsigned long msec;
+    static unsigned long p1msec,p10msec,p60msec;
     extern void recv16528port(void);
-    
+
+    swState = digitalRead(SW_SELECT);
+    msec = millis();
+    // スイッチがLOW（押された）かつ、前回から50ms以上経過（チャタリング対策）
+    if (swState == LOW && lastSwState == HIGH && (msec - lastSwTime > 50)) {
+        displayMode++;
+        if (displayMode > 2) {
+            displayMode = 0; // 元の表示に戻す
+        }
+        
+        lcd.clear();
+        lastSwTime = msec;
+    }
+    lastSwState = swState;
+// モードに応じたLCD表示制御
+    if (displayMode == 1) {
+        // 1回目LOW: プログラム名称とバージョンを表示 (txt[0] を利用)
+        lcd.setCursor(0, 0);
+        lcd.print(txt[0][0]); // "UECS Simulator  "
+        lcd.setCursor(0, 1);
+        lcd.print(txt[0][1]); // "Q917B Ver:2.13  "
+    } 
+    else if (displayMode == 2) {
+        // 2回目LOW: MACアドレスとIPアドレスを表示 (txt[3] を利用)
+        lcd.setCursor(0, 0);
+        lcd.print(txt[3][0]); // "0002.XXXX... (MACアドレス)"
+        lcd.setCursor(0, 1);
+        lcd.print(txt[3][1]); // "192.168... (IPアドレス)"
+    } else {
+        displayMode == 0;
+    }
+
     recv16528port();
     if (digitalRead(9)==LOW) {
         if (lcdf==1) {
@@ -117,33 +168,70 @@ void loop(void) {
     a4 = analogRead(A3);               // CO2
     li = map(a4,0,1023,200,2000);
     a4 = (int)li;
-    
+
+// --- 4個のADC監視とフラグ制御 ---
+    int currentADCValues[4] = {a1, a2, a3, a4};
+    bool anyChanged = false;
+
+    for (int i = 0; i < 4; i++) {
+        // アナログ入力の微小なノイズ（±1の揺らぎ）を無視するため、2以上の変化で判定
+        if (abs(currentADCValues[i] - lastADCValues[i]) >= 5) {
+            lastADCValues[i] = currentADCValues[i];
+            anyChanged = true;
+        }
+    }
+
+    msec = millis();
+
+    if (anyChanged) {
+        lastChangeTime = msec; // いずれかが動いたらタイマーをリセット
+        if (isSendingSuspended) {
+            lcd.clear();
+            isSendingSuspended = false; // 送信再開
+        }
+    }
+
+    // 1分以上（60000ミリ秒）どれも変化がなければフラグを立てる
+    if (!isSendingSuspended && (msec - lastChangeTime >= 60000)) {
+        lcd.clear();
+        lcd.setCursor(0,1);
+        lcd.print("STANDBY");
+        lcd.setCursor(0,0);
+        lcd.print("DEMO MODE");
+        isSendingSuspended = true; // 送信停止状態へ
+    }
+    // ---------------------------------------
+
     sprintf(s1,"%3d.%01d",a1b,abs(a1c));  // Temp
     sprintf(s2,"%3d",a2);                 // Humi
     sprintf(s3,"%4d",a3);                 // Radiation
     sprintf(s4,"%4d",a4);                 // CO2
-    if (lcdf==1) {
-        lcd.setCursor(0,0);
-        lcd.print("T:");
-        lcd.setCursor(10,1);
-        lcd.print("R:");
-        lcd.setCursor(10,0);
-        lcd.print("H:");
-        lcd.setCursor(0,1);
-        lcd.print("C:");
-        lcd.setCursor(2,0);
-        lcd.print(s1);
-        lcd.setCursor(12,0);
-        lcd.print(s2);
-        lcd.setCursor(12,1);
-        lcd.print(s3);
-        lcd.setCursor(2,1);
-        lcd.print(s4);
-    } else {
-        lcd.setCursor(0,0);
-        lcd.print("IP Address");
-        lcd.setCursor(0,1);
-        lcd.print(strIP);
+    if (displayMode == 0) {
+        if (lcdf==1) {
+            if (!isSendingSuspended) {
+                lcd.setCursor(0,0);
+                lcd.print("T:");
+                lcd.setCursor(10,1);
+                lcd.print("R:");
+                lcd.setCursor(10,0);
+                lcd.print("H:");
+                lcd.setCursor(0,1);
+                lcd.print("C:");
+                lcd.setCursor(2,0);
+                lcd.print(s1);
+                lcd.setCursor(12,0);
+                lcd.print(s2);
+                lcd.setCursor(12,1);
+                lcd.print(s3);
+                lcd.setCursor(2,1);
+                lcd.print(s4);
+            }
+        } else {
+            lcd.setCursor(0,0);
+            lcd.print("IP Address");
+            lcd.setCursor(0,1);
+            lcd.print(strIP);
+        }
     }
     sprintf(s1,"%d.%01d",a1b,abs(a1c));
     sprintf(s2,"%d",a2);
@@ -169,14 +257,16 @@ void loop(void) {
 
 void UserEvery1Sec(char s1[],char s2[],char s3[],char s4[]) {
     period1sec = 2;
-    uecsSendData(0x10,s1);
-    delay(30);
-    uecsSendData(0x30,s2);
-    delay(30);
-    uecsSendData(0x50,s3);
-    delay(30);
-    uecsSendData(0x70,s4);
-    delay(30);
+    if (!isSendingSuspended) {
+        uecsSendData(0x10,s1);
+        delay(30);
+        uecsSendData(0x30,s2);
+        delay(30);
+        uecsSendData(0x50,s3);
+        delay(30);
+        uecsSendData(0x70,s4);
+        delay(30);
+    }
     uecsSendData(0x90,"0");
     delay(30);
     period1sec = 0;

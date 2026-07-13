@@ -49,3 +49,4 @@
 #define UECS_NAME 26    // Max length of UECS Name
 #define UECS_VAL   6    // Max length of UECS Value
 #define UECS_IP   16    // Max length of IP Address
+#endif

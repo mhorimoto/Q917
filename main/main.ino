@@ -26,6 +26,7 @@ int period1sec,period10sec,period60sec;
 int lastADCValues[4] = {0, 0, 0, 0}; // A0, A1, A2, A3 の前回の値を保持
 unsigned long lastChangeTime = 0;    // 最後に値が変化した時間（ミリ秒）
 bool isSendingSuspended = false;     // 送信停止フラグ
+unsigned long suspendTimeoutMs = 60000; // ★追加：無入力判定時間（デフォルト1分）
 int displayMode = 0;                 // 0: 通常表示, 1: プログラム名/Ver, 2: IP/MAC
 int lastSwState = HIGH;              // 前回のスイッチ状態
 unsigned long lastSwTime = 0;        // チャタリング防止用タイマー
@@ -35,7 +36,7 @@ void setup(void) {
     int i;
     char z[17];
     txt[0][0] = "UECS Simulator  ";
-    txt[0][1] = "Q917B Ver:2.15  ";
+    txt[0][1] = "Q917B Ver:2.16  ";
     txt[1][0] = "DATA DRIVEN     ";
     txt[1][1] = "AGRICULTURE     ";
     txt[2][0] = "MAC Address     ";
@@ -103,6 +104,13 @@ void setup(void) {
     lastADCValues[3] = analogRead(A3);
     lastChangeTime = millis();
     isSendingSuspended = false;
+    // EEPROM(0x0F0)からデモモード設定値を読み出し、判定時間を決定する
+    uint8_t demoVal = EEPROM.read(DEMO_MODE_ADDR);
+    if (demoVal == 0x00 || demoVal == 0xFF) {
+        suspendTimeoutMs = 0; // 無入力判定は行わない（無効）
+    } else {
+        suspendTimeoutMs = (unsigned long)demoVal * 60000UL; // 分をミリ秒に変換
+    }
     // -------------------------
     pinMode(SW_SELECT, INPUT_PULLUP);
     lastSwState = digitalRead(SW_SELECT);
@@ -188,7 +196,6 @@ void loop(void) {
     }
 
     msec = millis();
-
     if (anyChanged) {
         lastChangeTime = msec; // いずれかが動いたらタイマーをリセット
         if (isSendingSuspended) {
@@ -198,7 +205,7 @@ void loop(void) {
     }
 
     // 1分以上（60000ミリ秒）どれも変化がなければフラグを立てる
-    if (!isSendingSuspended && (msec - lastChangeTime >= 60000)) {
+    if (suspendTimeoutMs > 0 && !isSendingSuspended && (msec - lastChangeTime >= suspendTimeoutMs)) {
         lcd.clear();
         lcd.setCursor(0,1);
         lcd.print("STANDBY");

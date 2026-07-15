@@ -52,5 +52,6 @@
 
 /*** EEPROM Addresses ***/
 #define EEPROM_BASE_ADDR 0x00
-#define VERSION_INFO 0x3f0  // Version Info (16 bytes limit)
+#define DEMO_MODE_ADDR 0x0f0  // Demo Mode (1 byte) 00 or ff is normal, others are demo mode
+#define VERSION_INFO 0x3f0    // Version Info (16 bytes limit)
 #endif

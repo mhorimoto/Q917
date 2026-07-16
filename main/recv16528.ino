@@ -35,42 +35,56 @@ void recv16528port(void) {
                 val[i] = uecsbuf[i];
             }
         }
+        val[i] = (char)NULL;
         if (!strcmp(val,"R77")) {
             resetFunc();
         }
-        if (val[0] == 'W' && readSize >= 14) {
+        if (val[0] == 'W' && readSize >= 15) {
             // 1. ベースアドレス (例: "10")
-            tmp[0] = val[1]; tmp[1] = val[2]; tmp[2] = '\0';
+            tmp[0] = val[1];
+            tmp[1] = val[2];
+            tmp[2] = '\0';
             base_addr = strtol(tmp, NULL, 16);
-
+            EEPROM.update(base_addr + 0x00, val[3]);
             // 2. Room (オフセット +0x01)
-            tmp[0] = val[3]; tmp[1] = val[4]; tmp[2] = '\0';
+            tmp[0] = val[4];
+            tmp[1] = val[5];
+            tmp[2] = '\0';
             EEPROM.update(base_addr + 0x01, strtol(tmp, NULL, 16));
 
             // 3. Region (オフセット +0x02)
-            tmp[0] = val[5]; tmp[1] = val[6]; tmp[2] = '\0';
+            tmp[0] = val[6];
+            tmp[1] = val[7];
+            tmp[2] = '\0';
             EEPROM.update(base_addr + 0x02, strtol(tmp, NULL, 16));
 
             // 4. Order (オフセット +0x03 から 2バイト分)
             // 4桁の16進数（例: "012C"）を数値化
-            tmp[0] = val[7]; tmp[1] = val[8]; tmp[2] = val[9]; tmp[3] = val[10]; tmp[4] = '\0';
+            tmp[0] = val[8];
+            tmp[1] = val[9];
+            tmp[2] = val[10];
+            tmp[3] = val[11];
+            tmp[4] = '\0';
             order_val = (uint16_t)strtol(tmp, NULL, 16);
-            
             // Big-Endian または ArduinoのEEPROMの配置に合わせて2バイトに分解して書き込み
             // get/putの挙動に合わせ、下位バイトを+0x03、上位バイトを+0x04 に保存
             EEPROM.update(base_addr + 0x03, lowByte(order_val));
             EEPROM.update(base_addr + 0x04, highByte(order_val));
 
             // 5. Priority (オフセット +0x05)
-            tmp[0] = val[11]; tmp[1] = val[12]; tmp[2] = '\0';
+            tmp[0] = val[12];
+            tmp[1] = val[13];
+            tmp[2] = '\0';
             EEPROM.update(base_addr + 0x05, strtol(tmp, NULL, 16));
 
             // 6. Interval (オフセット +0x06)
-            tmp[0] = val[13]; tmp[1] = val[14]; tmp[2] = '\0';
+            tmp[0] = val[14];
+            tmp[1] = val[15];
+            tmp[2] = '\0';
             EEPROM.update(base_addr + 0x06, strtol(tmp, NULL, 16));
 
-            // 7. CCM TYPE 文字列の書き込み (Orderが2桁増えたため、15文字目からスタート)
-            int strIdx = 15;
+            // 7. CCM TYPE 文字列の書き込み (16文字目からスタート)
+            int strIdx = 16;
             int eepromIdx = base_addr + 0x07;
             
             while (val[strIdx] != '\0' && strIdx < readSize && (eepromIdx - base_addr) < 32) {

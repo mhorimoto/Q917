@@ -72,15 +72,15 @@ Q917B Ver:2.15
 
 * **書式**:
 ```bash
-./q917sim.sh [IPアドレス] set [ベースアドレス] [Room] [Region] [Order] [Priority] [Interval] [CCM型式名]
+./q917sim.sh [IPアドレス] set [ベースアドレス] [Char] [Room] [Region] [Order] [Priority] [Interval] [CCM型式名]
 
 ```
 
 
 *(※ベースアドレス: `10`=温度, `30`=湿度, `50`=照度, `70`=CO2, `90`=cnd)*
-* **コマンド例（温度を「Room 2，Region 1，Order 300，Priority 10，Interval 15，型式名 InAirTemp」に変更）**:
+* **コマンド例（温度を「表示頭文字 T，Room 2，Region 1，Order 300，Priority 10，Interval 15，型式名 InAirTemp」に変更）**:
 ```bash
-./q917sim.sh 192.168.38.104 set 10 2 1 300 10 15 InAirTemp
+./q917sim.sh 192.168.38.104 set 10 T 2 1 300 10 15 InAirTemp
 
 ```
 

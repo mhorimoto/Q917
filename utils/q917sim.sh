@@ -15,9 +15,9 @@ show_help() {
     echo "  ver                     バージョン情報を取得します"
     echo "  dump [block]            EEPROMのメモリダンプを表示します (block: 0-3)"
     echo "  reset                   マイコンをソフトリセットします"
-    echo "  set [base] [room] [region] [order] [priority] [interval] [name]"
+    echo "  set [base] [char] [room] [region] [order] [priority] [interval] [name]"
     echo "                          指定したセンサのUECSパラメータを一括書き換えします"
-    echo "                          例: $(basename "$0") set 10 02 01 300 10 15 InAirTemp"
+    echo "                          例: $(basename "$0") set 10 T 02 01 300 10 15 InAirTemp"
     echo "  raw [string]            任意のコマンド文字列を直接送信します (例: raw S01105)"
     exit 1
 }
@@ -60,23 +60,24 @@ case "$SUB_CMD" in
         ;;
         
     set)
-        if [ $# -lt 7 ]; then
-            echo "Error: 'set' command requires 7 arguments."
-            echo "Format: set <base> <room> <region> <order> <priority> <interval> <name>"
+        if [ $# -lt 8 ]; then
+            echo "Error: 'set' command requires 8 arguments."
+            echo "Format: set <base> <char> <room> <region> <order> <priority> <interval> <name>"
             exit 1
         fi
-        
+        shift
         # 各引数のフォーマット整形
         BASE=$(printf "%02X" "0x$1" 2>/dev/null || printf "%02s" "$1")
-        ROOM=$(printf "%02X" "$2")
-        REGION=$(printf "%02X" "$3")
-        ORDER=$(printf "%04X" "$4") # 2バイト(4桁)に変換
-        PRIO=$(printf "%02X" "$5")
-        INTERVAL=$(printf "%02X" "$6")
-        NAME="$7"
+        CHAR="${2:0:1}" # 1文字目のみ使用
+        ROOM=$(printf "%02X" "$3")
+        REGION=$(printf "%02X" "$4")
+        ORDER=$(printf "%04X" "$5") # 2バイト(4桁)に変換
+        PRIO=$(printf "%02X" "$6")
+        INTERVAL=$(printf "%02X" "$7")
+        NAME="$8"
         
         # Wコマンド文字列の合成
-        W_CMD="W${BASE}${ROOM}${REGION}${ORDER}${PRIO}${INTERVAL}${NAME}"
+        W_CMD="W${BASE}${CHAR}${ROOM}${REGION}${ORDER}${PRIO}${INTERVAL}${NAME}"
         
         echo "Sending: $W_CMD"
         send_cmd "$W_CMD"

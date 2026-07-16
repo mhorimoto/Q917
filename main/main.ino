@@ -18,7 +18,7 @@ uint8_t nmask[]  = {255,255,255,0};
 uint8_t nullip[] = {0,0,0,0};
 char *txt[4][2];  // [screen][rows][columns]
 char strIP[16];
-char uecsid[6], uecstext[180],linebuf[80],val[16];
+char uecsid[6], uecstext[180],linebuf[80],val[48];
 IPAddress localIP,broadcastIP,subnetmaskIP,remoteIP;
 EthernetUDP Udp16520,Udp16528;
 int period1sec,period10sec,period60sec;
@@ -26,7 +26,7 @@ int period1sec,period10sec,period60sec;
 int lastADCValues[4] = {0, 0, 0, 0}; // A0, A1, A2, A3 の前回の値を保持
 unsigned long lastChangeTime = 0;    // 最後に値が変化した時間（ミリ秒）
 bool isSendingSuspended = false;     // 送信停止フラグ
-unsigned long suspendTimeoutMs = 60000; // ★追加：無入力判定時間（デフォルト1分）
+unsigned long suspendTimeoutMs = 60000; // 無入力判定時間（デフォルト1分）
 int displayMode = 0;                 // 0: 通常表示, 1: プログラム名/Ver, 2: IP/MAC
 int lastSwState = HIGH;              // 前回のスイッチ状態
 unsigned long lastSwTime = 0;        // チャタリング防止用タイマー
@@ -36,7 +36,7 @@ void setup(void) {
     int i;
     char z[17];
     txt[0][0] = "UECS Simulator  ";
-    txt[0][1] = "Q917B Ver:2.16  ";
+    txt[0][1] = "Q917B Ver:2.20  ";
     txt[1][0] = "DATA DRIVEN     ";
     txt[1][1] = "AGRICULTURE     ";
     txt[2][0] = "MAC Address     ";
@@ -92,7 +92,6 @@ void setup(void) {
     pinMode(A1,INPUT);
     pinMode(A2,INPUT);
     pinMode(A3,INPUT);
-    pinMode(9,INPUT);
     lcdf = 0;
     period1sec  = 0;
     period10sec = 0;
@@ -169,17 +168,17 @@ void loop(void) {
             lcd.clear();
         }
     }
-    a1 = analogRead(A0);               // 温度
+    a1 = analogRead(A0);               // 1:温度
     li = map(a1,0,1022,-100,500);
     a1b = (int)(li/10);
     a1c = (int)(li-(a1b*10));
-    a2 = analogRead(A1);               // 湿度
+    a2 = analogRead(A1);               // 2:湿度
     li = map(a2,0,1022,0,100);
     a2 = (int)li;
-    a3 = analogRead(A2);               // 照度
+    a3 = analogRead(A2);               // 3:照度
     li = map(a3,0,1023,0,1300);
     a3 = (int)li;
-    a4 = analogRead(A3);               // CO2
+    a4 = analogRead(A3);               // 4:CO2
     li = map(a4,0,1023,200,2000);
     a4 = (int)li;
 
@@ -222,14 +221,23 @@ void loop(void) {
     if (displayMode == 0) {
         if (lcdf==1) {
             if (!isSendingSuspended) {
+                char hdr1 = (char)EEPROM.read(0x10);
+                char hdr2 = (char)EEPROM.read(0x30);
+                char hdr3 = (char)EEPROM.read(0x50);
+                char hdr4 = (char)EEPROM.read(0x70);
                 lcd.setCursor(0,0);
-                lcd.print("T:");
-                lcd.setCursor(10,1);
-                lcd.print("R:");
+                lcd.print(hdr1);
+                lcd.print(":");
                 lcd.setCursor(10,0);
-                lcd.print("H:");
+                lcd.print(hdr2);
+                lcd.print(":");
+                lcd.setCursor(10,1);
+                lcd.print(hdr3);
+                lcd.print(":");
                 lcd.setCursor(0,1);
-                lcd.print("C:");
+                lcd.print(hdr4);
+                lcd.print(":");
+//
                 lcd.setCursor(2,0);
                 lcd.print(s1);
                 lcd.setCursor(12,0);
@@ -286,6 +294,7 @@ void UserEvery1Sec(char s1[],char s2[],char s3[],char s4[]) {
 }
 
 void UserEvery10Sec() {
+    Ethernet.maintain();
     period10sec = 2;
     period10sec = 0;
 }
